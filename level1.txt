@@ -1,0 +1,20 @@
+wWWWWWWWWwwWWWWWWWWwwWWWWWWWWwwWWWWWWWWw
+w                 1                    w
+W                 2                    W
+W                 3                    W
+W                 4                    W
+W                 5                    W
+W                 6                    W
+W                 7                    W
+W                 8                    W
+w                 9                    w
+w                 10                   w
+W                 11                   W
+W                 12                   W
+W                 13                   W
+WWWWWWWWW         14                   W
+WWWWFFFFFFFF      15                   W
+WWWFFWWWWWWW      16                   W
+WHFFW             17                   W
+wffW              18                   w
+wWWWWWWWWwwWWWWWWWWwwWWWWWWWWwWWWWWWWWWw
