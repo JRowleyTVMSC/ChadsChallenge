@@ -48,7 +48,6 @@ class Entity(Sprite) :
 
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-#   CHECK HISTORY FOR WEBSITES USED. GOOD STACKOVERFLOW STUFF YOU FORGOT TO BOOKMARK YOU IDIOT
 
 class BaseTile(Sprite) :
     def __init__(self, x, y, fileName, fileType) :
@@ -63,41 +62,42 @@ class BaseTile(Sprite) :
 
 class wallBlock(BaseTile) :
     def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "baseWallBlock.png")
+        BaseTile.__init__(self, bX, bY, "baseWallBlock.png", "W")
 
 class floorBlock(BaseTile) :
     def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "floorBlock.png")
+        BaseTile.__init__(self, bX, bY, "floorBlock.png", "_")
 
 class deathBlock(BaseTile) :
     def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "deathBlock.png")
+        BaseTile.__init__(self, bX, bY, "deathBlock.png", "D")
 
 class conveyorBlock(BaseTile) :
     def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "conveyorBlock.png")
+        BaseTile.__init__(self, bX, bY, "conveyorBlock.png", "C")
 
 class hintBlock(BaseTile) :
     def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "hintBlock.png")
+        BaseTile.__init__(self, bX, bY, "hintBlock.png", "H")
 class keyBlock(BaseTile) :
     def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "keyBlock.png")
+        BaseTile.__init__(self, bX, bY, "keyBlock.png", "K")
 
 
 
 def main() :
-    global FPSCLOCK, DISPLAYSURF, INFOSURF, COOLFONT, BASICFONT
+    global FPSCLOCK, DISPLAYSURF, INFOSURF,INVSURF , COOLFONT, BASICFONT
 
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WWIDTH, WHEIGHT))
+    INFOSURF = pygame.Surface((WHEIGHT / 2, 768))
+    INVSURF = pygame.Surface((50, 50))
     pygame.display.set_caption("It's Chad's Challenge baby!")
     COOLFONT = pygame.font.Font("VIDEOPHREAK.ttf", 40)
-    INFOSURF = pygame.Surface((WHEIGHT / 2, 768))
     BASICFONT = pygame.font.Font('freesansbold.ttf', 16)
-    BOARDSPRITE = Group()
+
     bigClock(True)
 
 
@@ -111,11 +111,12 @@ def main() :
 
         DISPLAYSURF.fill(BLACK)
         INFOSURF.fill(LGRAY)
+        INVSURF.fill(PBLUE)
 
         bigClock(False)
 
         DISPLAYSURF.blit(INFOSURF, (WWIDTH - (WWIDTH / 4) , 0))
-        drawInv()
+        INFOSURF.blit(INVSURF, (1300, 500))
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -139,13 +140,9 @@ def bigClock(new) :
     timer = COOLFONT.render(timeStr, True, BLACK)
     INFOSURF.blit(timer, (20, 20))
 
-# point of angery
-
-def drawInv() :
-    global INVSURF
-    INVSURF = pygame.surface((WHEIGHT / 2, 200))
-    INFOSURF.blit(INVSURF, (50 , 50))
-
+def clockScore() :
+    score = 1000
+    
 
 def parseThing() :
     levelString =  open("level1.txt", "r")
@@ -157,6 +154,8 @@ def parseThing() :
 
     print(chadBoard)
 
+def playerMovement() :
+    global playerX, playerY
 
 
 def boardBuild() :
@@ -165,11 +164,7 @@ def boardBuild() :
     f = open("level1.txt", "r")
     line = f.readlines()
     f.close()
-    for row in line :
-        for column in row :
-            if column == "w" :
-                w = wallBlock(x, y)
-                board.append(w)
-                blocks.add()
+
+
 
 main()
