@@ -103,7 +103,7 @@ def main() :
 
 
     playing = True
-    while playing:
+    while playing :
 
         for event in pygame.event.get() :
             if event.type == QUIT :
@@ -117,7 +117,7 @@ def main() :
 
         DISPLAYSURF.blit(INFOSURF, (WWIDTH - (WWIDTH / 4) , 0))
         INFOSURF.blit(INVSURF, (1300, 500))
-
+        clockScore()
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -141,8 +141,20 @@ def bigClock(new) :
     INFOSURF.blit(timer, (20, 20))
 
 def clockScore() :
-    score = 1000
-    
+    FPSCLOCK.tick(FPS)
+    alive = True
+    score = 0
+    trueScore = 150
+    timeInt = int(pygame.time.get_ticks() / 1000)
+    scoreStr = str(score)
+
+    displayScore = COOLFONT.render(scoreStr, True, BLACK)
+    while alive :
+        score -= trueScore - timeInt
+
+    INFOSURF.blit(displayScore, (40,40))
+
+
 
 def parseThing() :
     levelString =  open("level1.txt", "r")
