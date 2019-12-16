@@ -2,6 +2,7 @@ import pygame, random, sys, time
 from pygame.locals import *
 from pygame.sprite import *
 
+
 # main board colors
 BLACK = (0, 0, 0)
 WHITE = (225, 225, 225)
@@ -35,89 +36,114 @@ hintBlock = pygame.image.load("hintBlock.png")
 keyBlock = pygame.image.load("keyBlock.png")
 
 
-LINENUMBER = 20
-
-class Entity(Sprite) :
-    def __init__(self, x, y, width, height) :
-        pygame.sprite.Sprite.__init__(self)
-
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+TILEWIDTH = 50
+TILEHEIGHT = 85
+TILEFLOORHEIGHT = 45
 
 
-class BaseTile(Sprite) :
-    def __init__(self, x, y, fileName, fileType) :
+camMoveSpeed = 5
 
-        self.image = pygame.image.load(fileName)
-        self.rect = self.image.get_rect()
 
-        self.bX = x
-        self.bY = y
+IMAGEDICT = {'W' : pygame.image.load("baseWallBlock.png"),
+             '_' : pygame.image.load("floorBlock.png"),
+             'D' : pygame.image.load("deathBlock.png"),
+             'C' : pygame.image.load("conveyorBelt.png"),
+             'H' : pygame.image.load("hintBlock.png"),
+             'K' : pygame.image.load("keyBlock.png")}
 
-        self.fType = fileType
 
-class wallBlock(BaseTile) :
-    def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "baseWallBlock.png", "W")
-
-class floorBlock(BaseTile) :
-    def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "floorBlock.png", "_")
-
-class deathBlock(BaseTile) :
-    def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "deathBlock.png", "D")
-
-class conveyorBlock(BaseTile) :
-    def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "conveyorBlock.png", "C")
-
-class hintBlock(BaseTile) :
-    def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "hintBlock.png", "H")
-class keyBlock(BaseTile) :
-    def __init__(self, bX, bY) :
-        BaseTile.__init__(self, bX, bY, "keyBlock.png", "K")
-
+UP = 'up'
+DOWN = 'down'
+LEFT = 'left'
+RIGHT = 'right'
 
 
 def main() :
-    global FPSCLOCK, DISPLAYSURF, INFOSURF,INVSURF , COOLFONT, BASICFONT
-
+    global FPSCLOCK, DISPLAYSURF, IMAGEDICT, COOLFONT, BASICFONT, CURRENTIMAGE
 
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
-    DISPLAYSURF = pygame.display.set_mode((WWIDTH, WHEIGHT))
-    INFOSURF = pygame.Surface((WHEIGHT / 2, 768))
-    INVSURF = pygame.Surface((50, 50))
-    pygame.display.set_caption("It's Chad's Challenge baby!")
-    COOLFONT = pygame.font.Font("VIDEOPHREAK.ttf", 40)
+
+    DISPLAYSURF = pygame.dispaly.set_mode((WWIDTH,WHEIGHT))
+
+    pygame.display.set_caption('game')
+    COOLFONT - pygame.font.Font("VIDEOPHREAK.ttf", 40)
     BASICFONT = pygame.font.Font('freesansbold.ttf', 16)
 
-    bigClock(True)
+    IMAGEDICT = {'W': pygame.image.load("baseWallBlock.png"),
+                 '_': pygame.image.load("floorBlock.png"),
+                 'D': pygame.image.load("deathBlock.png"),
+                 'C': pygame.image.load("conveyorBelt.png"),
+                 'H': pygame.image.load("hintBlock.png"),
+                 'K': pygame.image.load("keyBlock.png")}
 
+    CURRENTIMAGE = 0
+    levels = readLevelsFile("level1.txt")
+    currentLevelIndex = 0
+    while True:
+            result = runLevel(levels, currentLevelIndex)
 
+            if result in ('solved', 'next') :
+                currentLevelIndex += 1
+                if currentLevelIndex >= len(levels) :
+                    currentLevelIndex = 0
+            elif result == 'back' :
+                currentLevelIndex -= 1
+                if currentLevelIndex < 0 :
+                    currentLevelIndex = len(levels) - 1
+            elif result == 'reset' :
+                pass
+
+def runLevel(levels, levelNum) :
+
+   global currentImage
+   levelObj = levels[levelNum]
+   mapNeedsRedraw = True
+   levelSurf = BASICFONT.render('Level %s of %s' % (levelObj['levelNum'] + 1, totalNumOfLevels), 1, PBLUE)
+   levelRect = levelSurf.get_rect()
+   levelRect.bottomleft = (20, WHEIGHT - 35)
+   mapWidth = len(mapObj) * TILEWIDTH
+   mapHeight = (len(mapObj[0]) - 1) * (TILEHEIGHT - TILEFLOORHEIGHT) + TILEHEIGHT
+
+    levelIsComplete = False
+
+   cameraOffsetX = 0
+   cameraOffsetY = 0
+
+   cameraUp = False
+   cameraDown = False
+   cameraLeft = False
+   cameraRight = False
 
     playing = True
     while playing :
+
+        playerMoveTo = None
+        keyPressed = False
 
         for event in pygame.event.get() :
             if event.type == QUIT :
                 playing = False
 
-        DISPLAYSURF.fill(BLACK)
-        INFOSURF.fill(LGRAY)
-        INVSURF.fill(PBLUE)
+            elif event.type == KEYDOWN :
+                keyPressed = True
+                if event.key == K_LEFT :
+                    playerMoveTo = LEFT
+                    cameraLeft = True
+                elif event.key == K_RIGHT :
+                    playerMoveTo = RIGHT
+                    cameraRight = True
+                elif event.key == K_UP :
+                    playerMoveTo = UP
+                    cameraUp = True
+                elif event.key == K_DOWN :
+                    playerMoveTo = DOWN
+                    cameraDown = True
 
-        bigClock(False)
+        if playerMoveTo != None and not levelIsComplete :
+            moved = makeMove(mapObj, gameStateObj, playerMoveTo)
 
-        DISPLAYSURF.blit(INFOSURF, (WWIDTH - (WWIDTH / 4) , 0))
-        INFOSURF.blit(INVSURF, (1300, 500))
-        clockScore()
+
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -154,6 +180,11 @@ def clockScore() :
 
     INFOSURF.blit(displayScore, (40,40))
 
+def drawBoard() :
+    for x in range(0, WWIDTH,CELLSIZE) :
+        pygame.draw.line(GAMESURF, DGRAY, (x, 0), (x, WHEIGHT))
+    for y in range(0,WHEIGHT, CELLSIZE) :
+        pygame.draw.line(GAMESURF, DGRAY, (0, y), (WWIDTH, y))
 
 
 def parseThing() :
@@ -166,16 +197,51 @@ def parseThing() :
 
     print(chadBoard)
 
-def playerMovement() :
-    global playerX, playerY
+
+def makeMove(levelObj, gameStateObj, playerMoteTo) :
+
+    playerx, playery = gameStateObj['player']
+    chips = gameStateObj['chips']
+
+    if playerMoveTo == UP:
+        xOffset = 0
+        yOffset = -1
+    elif playerMoveTo == RIGHT:
+        xOffset = 1
+        yOffset = 0
+    elif playerMoveTo == DOWN:
+        xOffset = 0
+        yOffset = 1
+    elif playerMoveTo == LEFT:
+        xOffset = -1
+        yOffset = 0
+
+def boardBuild(filename) :
+    levelFile = open("level1.txt", 'r')
+    content = levelFile.readlines() + ['\r\n']
+    levelFile.close()
+
+    levels = []
+    levelNum = 0
+    levelTextLines = []
+    levelObj = []
+    for lineNum in range(len(content)) :
+        line = content[lineNum].rstrip('\r\n')
+
+        if line != '' :
+            levelTextLines.append(line)
+        elif line == '' and len(levelTextLines) > 0 :
+            maxWidth = -1
+            for i in range(len(levelTextLines)) :
+                if len(levelTextLines[i]) > maxWidth :
+                    maxWidth = len(levelTextLines[i])
+            for x in range(len(levelTextLines[0])) :
+                levelObj.append([])
+            for y in range(len(levelTextLines[0])) :
+                for x in range(maxWidth) :
+                    levelObj[x].append(levelTextLines[y][x])
 
 
-def boardBuild() :
-    board = []
-    blocks = pygame.sprite.Group()
-    f = open("level1.txt", "r")
-    line = f.readlines()
-    f.close()
 
 
 
